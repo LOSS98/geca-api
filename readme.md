@@ -1,14 +1,35 @@
-# GECA API - Messaging Service with Queuing System
+# GECA API Endpoint Documentation
 
-GECA API is a messaging service that provides an API for sending emails and SMS with managed queues. The API ensures orderly processing with controlled delays between each send operation (1 second for emails, 6 seconds for SMS).
+## Overview
+
+GECA Messaging API is a robust Python-based messaging service providing secure email and SMS verification with an intelligent queuing system. Built using FastAPI, this service offers comprehensive communication utilities for authentication and messaging.
+
+## Technology Stack
+
+- **Language**: Python 3.11.0
+- **Web Framework**: FastAPI
+- **Database**: SQLite
+- **Email**: SMTP
+- **SMS**: TextMeBot API
 
 ## Key Features
 
-- ✉️ **Email Queue** - Sends emails with a 1-second delay between each send
-- 📱 **SMS Queue** - Sends SMS via TextMeBot with a 6-second delay between each send
-- 🔐 **Code Verification** - Generates and verifies security codes for email authentication
-- 🔑 **API Security** - Endpoint protection via API key
-- 📊 **Queue Monitoring** - Real-time queue status consultation
+- 📧 **Email Verification**
+  - Generate and validate secure verification codes
+  - Custom HTML email templates
+  - Queue-based email sending
+
+- 📱 **SMS Messaging**
+  - Send SMS through TextMeBot API
+  - Intelligent queuing with controlled sending intervals
+
+- 🔐 **API Security**
+  - Endpoint protection via API key authentication
+  - Secure environment variable management
+
+- 📊 **Queue Management**
+  - Real-time queue status monitoring
+  - Configurable send rates and attempt limits
 
 ## Project Structure
 
@@ -17,18 +38,19 @@ geca-api/
 ├── .venv/                # Python virtual environment
 ├── .env                  # Environment variables
 ├── app.py                # Main FastAPI application
-├── email_template.html   # HTML template for emails
+├── email_template.html   # HTML email template
 ├── verification.db       # SQLite database
-├── verification_utils.py # Utilities for code verification
-├── email_utils.py        # Utilities for email queuing
-└── sms_utils.py          # Utilities for SMS queuing
+├── verification_utils.py # Code verification utilities
+├── email_utils.py        # Email queuing utilities
+└── sms_utils.py          # SMS queuing utilities
 ```
 
 ## Prerequisites
 
-- Python 3.7+
-- SMTP account for sending emails
-- TextMeBot account for sending SMS (http://textmebot.com)
+- Python 3.11.0
+- pip package manager
+- SMTP account for email sending
+- TextMeBot account for SMS services
 
 ## Installation
 
@@ -40,10 +62,13 @@ geca-api/
 
 2. Create and activate a virtual environment:
    ```bash
-   python -m venv .venv
+   # Ensure you have Python 3.11.0 installed
+   python3.11 -m venv .venv
+   
+   # Activate the virtual environment
    # On Windows
    .venv\Scripts\activate
-   # On Linux/Mac
+   # On Linux/macOS
    source .venv/bin/activate
    ```
 
@@ -52,43 +77,40 @@ geca-api/
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file with the following variables:
+4. Configure Environment Variables
+   Create a `.env` file with the following configuration:
    ```
-   API_KEY=your_custom_api_key
-   EMAIL_ADDRESS=your_email@example.com
-   EMAIL_PASS=your_email_password
-   EMAIL_SERVER=smtp.example.com
+   API_KEY=your_secure_api_key
+   EMAIL_ADDRESS=your_smtp_email@example.com
+   EMAIL_PASS=your_smtp_password
+   EMAIL_SERVER=smtp.gmail.com
    EMAIL_PORT=465
    TEXTMEBOT_API_KEY=your_textmebot_api_key
    MAX_DURATION=3600
    MAX_ATTEMPS=3
    ```
 
-## Starting the Server
+## Authentication
 
-To start the API server:
+### API Key Requirements
+- All endpoints require an API key
+- Pass the API key in the `X-API-KEY` header
+- If no valid API key is provided, you'll receive a 403 Forbidden error
 
-```bash
-python app.py
-```
+## Verification Endpoints
 
-The server will start on `http://127.0.0.1:5000` by default.
+### 1. Generate Verification Code
+- **Endpoint**: `POST /generate`
+- **Purpose**: Generate a verification code and send it to an email address
 
-## API Endpoints
-
-### Code Verification
-
-#### `POST /generate`
-Generates a verification code and sends it via email.
-
-**Request:**
+#### Request
 ```json
 {
   "email": "user@uphf.fr"
 }
 ```
 
-**Response:**
+#### Successful Response
 ```json
 {
   "message": "Code will be sent",
@@ -97,18 +119,35 @@ Generates a verification code and sends it via email.
 }
 ```
 
-#### `POST /verify`
-Verifies a code received via email.
+#### Possible Errors
+- `400 Bad Request`: Invalid email format
+- `500 Internal Server Error`: System error during code generation
 
-**Request:**
+#### Python Request Example
+```python
+import requests
+
+url = "http://localhost:5000/generate"
+headers = {"X-API-KEY": "your_api_key"}
+data = {"email": "user@example.com"}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+
+### 2. Verify Verification Code
+- **Endpoint**: `POST /verify`
+- **Purpose**: Validate a verification code sent to an email
+
+#### Request
 ```json
 {
   "email": "user@uphf.fr",
-  "code": "ABC123XYZ"
+  "code": "ABC123"
 }
 ```
 
-**Response:**
+#### Successful Response
 ```json
 {
   "message": "Valid code",
@@ -116,42 +155,110 @@ Verifies a code received via email.
 }
 ```
 
-### Message Sending
+#### Possible Errors
+- `400 Bad Request`: Invalid code
+- `429 Too Many Attempts`: Exceeded maximum verification attempts
+- `410 Gone`: Code has expired
+- `404 Not Found`: Email not found in verification system
 
-#### `POST /send-email`
-Adds an email to the queue.
+#### Python Request Example
+```python
+import requests
 
-**Request:**
+url = "http://localhost:5000/verify"
+headers = {"X-API-KEY": "your_api_key"}
+data = {
+  "email": "user@example.com",
+  "code": "123456"
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+
+### 3. Send Custom Code
+- **Endpoint**: `POST /send-custom-code`
+- **Purpose**: Send a custom verification code via email
+
+#### Request
 ```json
 {
-  "to": "recipient@example.com",
-  "subject": "Email subject",
-  "body": "Email content"
+  "email": "user@uphf.fr",
+  "code": "CUSTOM123",
+  "subject": "Optional Custom Subject"
 }
 ```
 
-**Response:**
+#### Successful Response
 ```json
 {
-  "message": "Email queued successfully",
-  "to": "recipient@example.com",
+  "message": "Custom code will be sent",
+  "email": "user@uphf.fr",
   "queue_id": 1,
   "status": 200
 }
 ```
 
-#### `POST /send-sms`
-Adds an SMS to the queue.
+#### Possible Errors
+- `500 Internal Server Error`: Failed to queue email
 
-**Request:**
+## Messaging Endpoints
+
+### 4. Send Email
+- **Endpoint**: `POST /send-email`
+- **Purpose**: Send a custom email to a specific address
+
+#### Request
 ```json
 {
-  "recipient": "+33612345678",
-  "message": "SMS content"
+  "to": "recipient@example.com",
+  "subject": "Important Message",
+  "body": "This is the email content in HTML format"
 }
 ```
 
-**Response:**
+#### Successful Response
+```json
+{
+  "message": "Email queued successfully",
+  "to": "recipient@example.com",
+  "queue_id": 2,
+  "status": 200
+}
+```
+
+#### Possible Errors
+- `500 Internal Server Error`: Failed to queue email
+
+#### Python Request Example
+```python
+import requests
+
+url = "http://localhost:5000/send-email"
+headers = {"X-API-KEY": "your_api_key"}
+data = {
+  "to": "recipient@example.com",
+  "subject": "Hello",
+  "body": "<html><body><h1>Welcome!</h1></body></html>"
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+
+### 5. Send SMS
+- **Endpoint**: `POST /send-sms`
+- **Purpose**: Send an SMS to a specific phone number
+
+#### Request
+```json
+{
+  "recipient": "+33612345678",
+  "message": "Your SMS message here"
+}
+```
+
+#### Successful Response
 ```json
 {
   "message": "SMS queued successfully",
@@ -161,12 +268,35 @@ Adds an SMS to the queue.
 }
 ```
 
-### Status
+#### Requirements
+- Phone number MUST start with a country code (e.g., +33 for France)
 
-#### `GET /queue-status`
-Returns the current state of the queues.
+#### Possible Errors
+- `400 Bad Request`: Invalid phone number format
+- `500 Internal Server Error`: Failed to queue SMS
 
-**Response:**
+#### Python Request Example
+```python
+import requests
+
+url = "http://localhost:5000/send-sms"
+headers = {"X-API-KEY": "your_api_key"}
+data = {
+  "recipient": "+33612345678",
+  "message": "Your verification code is 123456"
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+
+## Status Endpoint
+
+### 6. Queue Status
+- **Endpoint**: `GET /queue-status`
+- **Purpose**: Check the current status of email and SMS queues
+
+#### Successful Response
 ```json
 {
   "email_queue_size": 2,
@@ -174,75 +304,30 @@ Returns the current state of the queues.
 }
 ```
 
-## Authentication
+#### Python Request Example
+```python
+import requests
 
-All endpoints require API key authentication. Add the `X-API-KEY` header to each request:
+url = "http://localhost:5000/queue-status"
+headers = {"X-API-KEY": "your_api_key"}
 
-```
-X-API-KEY: your_custom_api_key
-```
-
-## API Documentation
-
-Interactive documentation is available at `http://127.0.0.1:5000/docs` when the server is running.
-
-## Email Template Customization
-
-Emails use an HTML template. You can customize this template by modifying the `email_template.html` file. The template uses the `{{ variable }}` substitution syntax to insert dynamic values.
-
-Example template:
-```html
-<html>
-<body>
-  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-    <h2>Your Verification Code</h2>
-    <p>Here is your code: <strong>{{ code }}</strong></p>
-  </div>
-</body>
-</html>
+response = requests.get(url, headers=headers)
+print(response.json())
 ```
 
-## Error Handling
+## Common Error Responses
 
-The API returns standard HTTP error codes:
+### Authentication Errors
+- `403 Forbidden`: Invalid or missing API key
 
-- `400 Bad Request` - Invalid request (e.g., incorrect email format)
-- `403 Forbidden` - Incorrect API key
-- `404 Not Found` - Resource not found
-- `410 Gone` - Code expired
-- `429 Too Many Requests` - Too many attempts
-- `500 Internal Server Error` - Server internal error
+### Validation Errors
+- `400 Bad Request`: 
+  - Invalid email format
+  - Missing required fields
+  - Incorrect phone number format
 
-## Development
-
-### Auto-reload
-
-For development, you can enable auto-reload:
-
-```bash
-uvicorn app:app --reload --port 5000
-```
-
-### Required Dependencies
-
-Create a `requirements.txt` file with the following dependencies:
-
-```
-fastapi==0.95.1
-uvicorn==0.22.0
-pydantic==1.10.7
-python-dotenv==1.0.0
-requests==2.28.2
-```
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Contributors
-
-- Your Name - Lead Developer
-
-## Support
-
-For questions or issues, please open an issue on the GitHub repository.
+### System Errors
+- `500 Internal Server Error`: 
+  - Database connection issues
+  - Email/SMS sending failures
+  - Unexpected system errors
