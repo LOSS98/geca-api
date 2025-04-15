@@ -40,6 +40,11 @@ jobs:
           MAX_ATTEMPS=${{ secrets.MAX_ATTEMPS }}
           EOL"
 
-      - name: Build and restart Docker container
-        run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker compose down && docker compose build && docker compose up -d"sh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker compose down && docker compose build && docker compose up -d"${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker-compose down && docker-compose build && docker-compose up -d"
+      - name: Stop containers
+        run: ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker compose down"
+
+      - name: Build containers
+        run: ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker compose build"
+
+      - name: Start containers
+        run: ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker compose up -d"-p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker compose down && docker compose build && docker compose up -d"sh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker compose down && docker compose build && docker compose up -d"${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker-compose down && docker-compose build && docker-compose up -d"
