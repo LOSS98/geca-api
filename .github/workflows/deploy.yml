@@ -42,4 +42,4 @@ jobs:
 
       - name: Build and restart Docker container
         run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker-compose down && docker-compose build && docker-compose up -d"
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker compose down && docker compose build && docker compose up -d"${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd ~/geca-api && docker-compose down && docker-compose build && docker-compose up -d"
