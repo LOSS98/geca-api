@@ -141,7 +141,7 @@ def process_email_queue():
 
             success, error = send_email_direct(to_email, subject, body)
 
-            conn = sqlite3.connect(os.path.dirname(os.path.abspath(__file__))+"/verification.db")
+            conn = sqlite3.connect(os.path.dirname(os.path.abspath(__file__))+"\\verification.db")
             cursor = conn.cursor()
 
             if success:
