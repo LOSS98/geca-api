@@ -152,7 +152,7 @@ def send_sms(request: SMSRequest, api_key: str = Depends(verify_api_key)):
 async def queue_status(api_key: str = Depends(verify_api_key)):
     try:
 
-        conn = sqlite3.connect(os.path.dirname(os.path.abspath(__file__))+"/verification.db")
+        conn = sqlite3.connect(os.path.dirname(os.path.abspath(__file__))+"/\\verification.db")
         cursor = conn.cursor()
 
         cursor.execute("SELECT COUNT(*) FROM email_queue WHERE status = 'pending'")
@@ -188,5 +188,5 @@ async def startup_event():
 
 if __name__ == "__main__":
     import uvicorn
-
+    print(os.path.dirname(os.path.abspath(__file__))+"\\verification.db")
     uvicorn.run("app:app", host="127.0.0.1", port=5000, reload=False)
