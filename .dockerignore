@@ -1,0 +1,10 @@
+.venv/
+.git/
+.github/
+.gitignore
+.env
+verification.db
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
