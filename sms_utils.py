@@ -19,7 +19,7 @@ if not TEXTMEBOT_API_KEY:
     logger.warning("TEXTMEBOT_API_KEY is not defined in the .env file")
 
 def init_sms_db():
-    conn = sqlite3.connect("verification.db")
+    conn = sqlite3.connect("/app/verification.db")
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -42,7 +42,7 @@ def queue_sms(recipient, message):
 
         init_sms_db()
 
-        conn = sqlite3.connect("verification.db")
+        conn = sqlite3.connect("/app/verification.db")
         cursor = conn.cursor()
 
         cursor.execute(
@@ -90,7 +90,7 @@ def send_sms(recipient, message):
 
 def process_sms_queue():
     try:
-        conn = sqlite3.connect("verification.db")
+        conn = sqlite3.connect("/app/verification.db")
         cursor = conn.cursor()
 
         cursor.execute(
@@ -111,7 +111,7 @@ def process_sms_queue():
 
             success, result_message = send_sms(recipient, message)
 
-            conn = sqlite3.connect("verification.db")
+            conn = sqlite3.connect("/app/verification.db")
             cursor = conn.cursor()
 
             if success:

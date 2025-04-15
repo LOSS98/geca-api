@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 def init_email_db():
-    conn = sqlite3.connect("verification.db")
+    conn = sqlite3.connect("/app/verification.db")
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -40,7 +40,7 @@ def queue_email(to_email, subject, body):
 
         init_email_db()
 
-        conn = sqlite3.connect("verification.db")
+        conn = sqlite3.connect("/app/verification.db")
         cursor = conn.cursor()
 
         cursor.execute(
@@ -120,7 +120,7 @@ def load_html_template(template_variables, template_path="./email_template.html"
 
 def process_email_queue():
     try:
-        conn = sqlite3.connect("verification.db")
+        conn = sqlite3.connect("/app/verification.db")
         cursor = conn.cursor()
 
         cursor.execute(
@@ -141,7 +141,7 @@ def process_email_queue():
 
             success, error = send_email_direct(to_email, subject, body)
 
-            conn = sqlite3.connect("verification.db")
+            conn = sqlite3.connect("/app/verification.db")
             cursor = conn.cursor()
 
             if success:

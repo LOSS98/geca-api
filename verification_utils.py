@@ -10,7 +10,7 @@ from email_utils import queue_email, load_html_template
 load_dotenv()
 
 def init_db():
-    conn = sqlite3.connect("verification.db")
+    conn = sqlite3.connect("/app/verification.db")
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS verification_table (
@@ -29,7 +29,7 @@ def generate_code(email):
         init_db()
         characters = string.ascii_letters + string.digits
         code = ''.join(random.choice(characters).upper() for i in range(8))
-        conn = sqlite3.connect("verification.db")
+        conn = sqlite3.connect("/app/verification.db")
         cursor = conn.cursor()
         now = datetime.datetime.now()
 
@@ -45,7 +45,7 @@ def generate_code(email):
 def verify_code(email, code):
     if check_fisa(email):
         init_db()
-        conn = sqlite3.connect("verification.db")
+        conn = sqlite3.connect("/app/verification.db")
         cursor = conn.cursor()
         now = datetime.datetime.now()
 
