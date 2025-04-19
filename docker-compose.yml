@@ -3,6 +3,7 @@ services:
     build: .
     container_name: geca-api
     restart: always
+    network_mode: "host"
     ports:
       - "5000:5000"
     volumes:
