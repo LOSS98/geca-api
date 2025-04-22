@@ -42,7 +42,7 @@ class VerifyRequest(BaseModel):
 class SendCodeRequest(BaseModel):
     email: EmailStr
     code: str
-    subject: Optional[str] = "Los Barryachies - Ton code de code de vérification"
+    subject: Optional[str] = "Los Barryachies - Ton code de vérification"
 
 class SMSRequest(BaseModel):
     recipient: str
@@ -63,7 +63,7 @@ def generate(request: EmailRequest, api_key: str = Depends(verify_api_key)):
         if code == -1:
             raise HTTPException(status_code=400, detail="Unauthorized email")
 
-        send_code_email(request.email, "Los Barryachies - Ton code de code de vérification", code)
+        send_code_email(request.email, "Los Barryachies - Ton code de vérification", code)
         return {"message": "Code will be sent", "email": request.email, "status": 200}
 
     except Exception as e:
@@ -92,7 +92,7 @@ def send_custom_code(request: SendCodeRequest, api_key: str = Depends(verify_api
 
         html_content = load_html_template({'code': request.code})
 
-        email_id = queue_email(request.email, "Los Barryachies - Ton code de code de vérification", html_content)
+        email_id = queue_email(request.email, "Los Barryachies - Ton code de vérification", html_content)
 
         if email_id:
             return {
